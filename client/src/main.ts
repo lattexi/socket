@@ -1,33 +1,25 @@
+import CryptoJS from "crypto-js";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3000");
+const serverUrl = import.meta.env.VITE_SERVER_URL;
 
-const messages = document.getElementById("messages") as HTMLUListElement | null;
-if (!messages) throw new Error("Messages list not found");
+const socket = io(serverUrl);
 
-const form = document.getElementById("form") as HTMLFormElement | null;
-if (!form) throw new Error("Form not found");
-
-const input = document.getElementById("input") as HTMLInputElement | null;
-if (!input) throw new Error("Input not found");
-
-const nameDialog = document.getElementById(
-  "name-dialog"
-) as HTMLDialogElement | null;
-if (!nameDialog) throw new Error("Name dialog not found");
+const messages = document.getElementById("messages") as HTMLUListElement;
+const form = document.getElementById("form") as HTMLFormElement;
+const input = document.getElementById("input") as HTMLInputElement;
+const nameDialog = document.getElementById("name-dialog") as HTMLDialogElement;
 
 nameDialog.showModal();
 
-const nameForm = document.getElementById("name-form") as HTMLFormElement | null;
-if (!nameForm) throw new Error("Name form not found");
-
-const nameInput = document.getElementById("name") as HTMLInputElement | null;
-if (!nameInput) throw new Error("Name input not found");
-
+const nameForm = document.getElementById("name-form") as HTMLFormElement;
+const nameInput = document.getElementById("name") as HTMLInputElement;
 const roomButtons = document.querySelectorAll(
   "#rooms > button"
 ) as NodeListOf<HTMLButtonElement>;
-if (roomButtons.length === 0) throw new Error("No room buttons found");
+const encryptionKeyInput = document.getElementById(
+  "encryption-key"
+) as HTMLInputElement;
 
 let userName: string | undefined;
 
@@ -39,6 +31,7 @@ nameForm.addEventListener("submit", function (e) {
     roomButtons.forEach((button) => {
       button.style.display = "inline-block";
     });
+    encryptionKeyInput.style.display = "block";
   }
 });
 
@@ -70,19 +63,31 @@ form.addEventListener("submit", function (e) {
   item.textContent = userName + ": " + input.value;
   messages.appendChild(item);
 
+  const encryptedMessage = CryptoJS.AES.encrypt(
+    input.value,
+    encryptionKeyInput.value
+  ).toString();
+
   if (input.value) {
     socket.emit("chat message", {
       name: userName,
       room: currentRoom,
-      message: input.value,
+      message: encryptedMessage,
     });
     input.value = "";
   }
 });
 
 socket.on("chat message", function (msg) {
+  const bytes = CryptoJS.AES.decrypt(msg.message, encryptionKeyInput.value);
+  const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+  if (!decrypted) {
+    return;
+  }
+
   let item = document.createElement("li");
-  item.textContent = msg;
+  const text = msg.name + ": " + decrypted;
+  item.textContent = text;
   messages.appendChild(item);
   window.scrollTo(0, document.body.scrollHeight);
 });

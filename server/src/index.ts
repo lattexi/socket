@@ -1,8 +1,8 @@
 import express from "express";
 import { createServer } from "node:http";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
 import { Server } from "socket.io";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const app = express();
 const server = createServer(app);
@@ -14,9 +14,8 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   socket.on("chat message", (data) => {
-    socket.broadcast
-      .to(data.room)
-      .emit("chat message", data.name + ": " + data.message);
+    console.log(data);
+    socket.broadcast.to(data.room).emit("chat message", data);
   });
 
   socket.on("join room", (data) => {

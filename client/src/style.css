@@ -70,3 +70,11 @@ body {
 #rooms > button:active {
   background: #555;
 }
+
+#encryption-key {
+  display: none;
+  padding: 0 1rem;
+  border-radius: 2rem;
+  margin: 0.25rem;
+  height: 2rem;
+}
