@@ -1,9 +1,9 @@
 services:
   server:
     build: ./server
+    ports:
+      - "3006:3000"
   client:
     build: ./client
     ports:
       - "85:80"
-    environment:
-      - VITE_SERVER_URL=http://server:3000

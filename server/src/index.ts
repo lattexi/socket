@@ -1,8 +1,6 @@
 import express from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 const app = express();
 const server = createServer(app);
@@ -10,6 +8,10 @@ const io = new Server(server, {
   cors: {
     origin: "*",
   },
+});
+
+app.get("/health", (req, res) => {
+  res.send("OK");
 });
 
 io.on("connection", (socket) => {
