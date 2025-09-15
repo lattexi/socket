@@ -1,9 +1,7 @@
 import CryptoJS from "crypto-js";
 import { io } from "socket.io-client";
 
-const serverUrl = import.meta.env.VITE_SERVER_URL;
-
-const socket = io(serverUrl);
+const socket = io(undefined, { path: "/socket.io" });
 
 const messages = document.getElementById("messages") as HTMLUListElement;
 const form = document.getElementById("form") as HTMLFormElement;
